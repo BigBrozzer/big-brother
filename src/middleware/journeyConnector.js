@@ -15,6 +15,8 @@ let reducer = console.log;
 let appStore = null;
 
 export const startRecording = () => {
+    journeyInfo.initialState = appStore.getState();
+
     recording = true;
 };
 
@@ -46,12 +48,7 @@ const journeyMiddleWare = store => {
     appStore = store;
 
     return next => action => {
-        console.log('Middleware triggered:', action);
         if (recording) {
-            if (journeyInfo.initialState === null) {
-                journeyInfo.initialState = store.getState();
-                console.log('Store defined:', action);
-            }
             journeyInfo.actions.push(action);
         }
         next(action);
