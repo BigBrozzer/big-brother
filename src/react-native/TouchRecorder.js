@@ -5,7 +5,11 @@ import {
   InteractionManager,
   Animated,
   StyleSheet,
+  Text,
+  TouchableWithoutFeedback,
+  Modal,
 } from 'react-native';
+import { BlurView } from 'react-native-blur';
 var { getInstanceFromNode } = require('ReactNativeComponentTree');
 
 class TouchHint extends Component {
@@ -129,6 +133,7 @@ class TouchRecorder extends Component {
   state = {
     touches: [],
     isRecording: false,
+    isControlsModalVisible: false,
   };
   shouldAdd = true;
 
@@ -199,10 +204,19 @@ class TouchRecorder extends Component {
     this.setState(state => ({ isRecording: !state.isRecording }), this._enableAdding);
   };
 
+  _showControlsModal() {
+    this.setState({ isControlsModalVisible: true });
+  }
+
+  _hideControlsModal() {
+    this.setState({ isControlsModalVisible: false });
+  }
+
   render() {
-    const { isRecording } = this.state;
+    const { isRecording, isControlsModalVisible } = this.state;
     return (
-      <View
+      <TouchableWithoutFeedback
+        onLongPress={this._showControlsModal.bind(this)}
         style={styles.container}
         onStartShouldSetResponder={event => !!event}
         pointerEvents="box-none"
@@ -218,7 +232,30 @@ class TouchRecorder extends Component {
         >
           <View style={{ width: touchSize, height: touchSize, borderRadius: touchSize / 2, backgroundColor: 'red'}}></View>
         </TouchableOpacity>
-      </View>
+        <Modal
+          visible={isControlsModalVisible}
+          animationType="slide"
+          transparent={false}
+          onRequestClose={this._hideControlsModal.bind(this)}
+        >
+          <BlurView
+            style={styles.absolute}
+            viewRef={this.modalContent}
+            blurType="light"
+            blurAmount={10}
+          />
+          <View
+            style={styles.modalContent}
+            ref={modalContent => {
+              if (modalContent) {
+                this.modalContent = modalContent;
+              }
+            }}
+          >
+          </View>
+          <View style={styles.btn}><Text>Start Recording</Text></View>
+        </Modal>
+      </TouchableWithoutFeedback>
     );
   }
 }
@@ -234,6 +271,13 @@ const touchSize = 40;
 const styles = StyleSheet.create({
   btnSize: touchSize,
   container: {
+    flex: 1,
+  },
+  absolute: {
+    position: "absolute",
+    top: 0, left: 0, bottom: 0, right: 0,
+  },
+  modalContent: {
     flex: 1,
   },
   hint: {
