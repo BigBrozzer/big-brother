@@ -3,7 +3,7 @@ import { startRecording, stopRecording, sendRecords, startPlaying } from '../mid
 import JourneyControls from './JourneyControls';
 import RecordButton from './RecordButton';
 
-export class Journey extends Component {
+class Journey extends Component {
     constructor(props) {
         super(props);
 
