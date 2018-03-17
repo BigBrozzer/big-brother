@@ -8,12 +8,15 @@
 ```
 
 ### render Journey
-```html
+```jsx
 import React from 'react';
 import ReactDom from 'react-dom';
 import { BBUI } from 'big-brother';
 
 ReactDOM.render(<BBUI />, document.getElementById('bb'));
+
+// for react-native apps - import hoc:
+import withRecorder from 'big-brother/src/react-native';
 ```
 
 ## rewrite your's root reducer

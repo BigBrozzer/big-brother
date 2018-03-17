@@ -11,6 +11,7 @@ var { getInstanceFromNode } = require('ReactNativeComponentTree');
 class TouchHint extends Component {
   opacity = new Animated.Value(0);
   scale = new Animated.Value(0);
+  currentTouchId = null;
 
   componentDidMount() {
     const { timeDiff } = this.props;
@@ -27,17 +28,25 @@ class TouchHint extends Component {
       ]).start();
     }, timeDiff);
   }
-  
-  render() {
-    const { id, y, x, onPressIn, onPress } = this.props;
+
+  _renderTap() {
+    const {
+      id,
+      y_start,
+      x_start,
+      timestamp_start,
+      onPressIn,
+      onPress,
+    } = this.props;
+
     return (
       <TouchableOpacity
         onPressIn={onPressIn}
         onPress={onPress}
         pointerEvents="box-only"
         style={[styles.hintBtn, {
-          top: y - (styles.btnSize / 2),
-          left: x - (styles.btnSize / 2),
+          top: y_start - (styles.btnSize / 2),
+          left: x_start - (styles.btnSize / 2),
           transform: [{
             scale: this.scale.interpolate({
               inputRange: [0, 0.5, 1],
@@ -50,6 +59,58 @@ class TouchHint extends Component {
       </TouchableOpacity>
     );
   }
+
+  _renderSwipe() {
+    const {
+      id,
+      y_start,
+      y_end,
+      x_start,
+      x_end,
+      timestamp_start,
+      timestamp_end,
+      onPressIn,
+      onPress,
+    } = this.props;
+
+    return (
+      <TouchableOpacity
+        onPressIn={onPressIn}
+        onPress={onPress}
+        pointerEvents="box-only"
+        style={[styles.hintBtn, {
+          top: y_start - (styles.btnSize / 2),
+          left: x_start - (styles.btnSize / 2),
+          transform: [{
+            scale: this.scale.interpolate({
+              inputRange: [0, 0.5, 1],
+              outputRange: [1, 0.6, 1]
+            })
+          }],
+        }]}
+      >
+        <Animated.View style={[styles.hint, { opacity: this.opacity }]} />
+      </TouchableOpacity>
+    );
+  }
+  
+  render() {
+    const {
+      id,
+      y_start,
+      x_start,
+      x_end,
+      y_end,
+      timestamp_start,
+      timestamp_end,
+      onPressIn,
+      onPress,
+    } = this.props;
+    if (timestamp_end - timestamp_start < 100) {
+      return this._renderTap();
+    }
+    return this._renderSwipe();
+  }
 }
 
 class TouchRecorder extends Component {
@@ -59,18 +120,33 @@ class TouchRecorder extends Component {
   };
   shouldAdd = true;
 
-  _onTouchEnd(event) {
-    const { isRecording } = this.state;
+  _onTouchStart(event) {
     if (isRecording && this.shouldAdd) {
       event.persist();
+      this.currentTouchId = `${event.nativeEvent.pageX}_${event.nativeEvent.pageY}`;
       this.setState(state => {
         return { touches: [...state.touches, {
-          id: `${event.nativeEvent.pageX}_${event.nativeEvent.pageY}`,
-          x: event.nativeEvent.pageX,
-          y: event.nativeEvent.pageY,
-          timestamp: event.nativeEvent.timestamp,
-          timeDiff: (event.nativeEvent.timestamp - (state.touches[0] || {}).timestamp) || 0,
+          id: this.currentTouchId,
+          x_start: event.nativeEvent.pageX,
+          y_start: event.nativeEvent.pageY,
+          timestamp_start: event.nativeEvent.timestamp,
+          timeDiff: (event.nativeEvent.timestamp - (state.touches[0] || {}).timestamp_start) || 0,
         }]};
+      });
+    }
+  }
+
+  _onTouchEnd(event) {
+    const { isRecording, touches } = this.state;
+    const existingEventIndex = touches.findIndex(t => t.id === this.currentTouchId);
+    if (isRecording && this.shouldAdd) {
+      event.persist();
+      const updatedEvents = [...touches];
+      updatedEvents.splice(existingEventIndex, 1, {
+        ...touches[existingEventIndex],
+        x_end: event.nativeEvent.pageX,
+        y_end: event.nativeEvent.pageY,
+        timestamp_end: event.nativeEvent.timestamp,
       });
     }
   };
@@ -116,6 +192,7 @@ class TouchRecorder extends Component {
         style={styles.container}
         onStartShouldSetResponder={event => !!event}
         pointerEvents="box-none"
+        onTouchStart={this._onTouchStart.ind(this)}
         onTouchEnd={this._onTouchEnd.bind(this)}
       >
         {this.props.children}
@@ -132,7 +209,7 @@ class TouchRecorder extends Component {
   }
 }
 
-export default withRecorder = Component => props => {
+export default Component => props => {
   return (
     <TouchRecorder>
       <Component {...props} />
