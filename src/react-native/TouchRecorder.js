@@ -192,7 +192,7 @@ class TouchRecorder extends Component {
         style={styles.container}
         onStartShouldSetResponder={event => !!event}
         pointerEvents="box-none"
-        onTouchStart={this._onTouchStart.ind(this)}
+        onTouchStart={this._onTouchStart.bind(this)}
         onTouchEnd={this._onTouchEnd.bind(this)}
       >
         {this.props.children}
