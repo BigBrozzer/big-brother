@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
-import { startRecording, stopRecording, sendRecords, startPlaying } from '../middleware/journeyConnector';
+import { startRecording, stopRecording, sendRecords, startPlaying, pushUserAction } from '../middleware/journeyConnector';
 import JourneyControls from './JourneyControls';
 import RecordButton from './RecordButton';
+import {userActionTypes} from "../middleware/userActionTypes.constant";
+import {createUserAction} from "../middleware/bigBrotherActionFactory";
 
 class Journey extends Component {
     constructor(props) {
@@ -20,6 +22,27 @@ class Journey extends Component {
         this.startPlaying = this.startPlaying.bind(this);
         this.show = this.show.bind(this);
         this.hide = this.hide.bind(this);
+
+        /* Record click and scroll actions */
+    }
+
+    componentDidMount() {
+        const applicationRootElement = document.querySelector('#root');
+        if (applicationRootElement) {
+            applicationRootElement.addEventListener('click', this.onDocumentClickEvent);
+        }
+    }
+
+    componentWillUnmount() {
+        document.removeEventListener('click', this.onDocumentClickEvent);
+    }
+
+    onDocumentClickEvent(event) {
+        const timeStamp = (new Date()).getTime();
+        const clickAction = { pageY: event.pageY, pageX: event.pageX };
+        const userAction = createUserAction(clickAction, userActionTypes.clickAction, timeStamp);
+
+        pushUserAction(userAction);
     }
 
     startRecording() {

@@ -1,4 +1,6 @@
 import React from 'react';
+import { userActionTypes } from './userActionTypes.constant';
+import {createMarkHtmlElementOnThePage} from "../react-ui/utils/markElementCreator";
 
 let recording = false;
 
@@ -22,6 +24,10 @@ export const stopRecording = () => {
     recording = false;
 };
 
+export const pushUserAction = (userAction) => {
+    journeyInfo.actions.push(userAction);
+};
+
 export const sendRecords = () => api.sendRecord(journeyInfo);
 
 export const resetRecorder = () => {
@@ -38,7 +44,15 @@ export const startPlaying = (id) => api.getRecord(id)
         });
 
         actions.forEach((action, index) => {
-            setTimeout(() => appStore.dispatch(action), index*1000);
+            setTimeout(() => {
+                if (action.type === userActionTypes.storeAction) {
+                    appStore.dispatch(action.action);
+                }
+
+                if (action.type === userActionTypes.clickAction) {
+                    createMarkHtmlElementOnThePage(action.action);
+                }
+            }, index*1000);
         });
     });
 
@@ -52,7 +66,7 @@ const journeyMiddleWare = store => {
                 journeyInfo.initialState = store.getState();
                 console.log('Store defined:', action);
             }
-            journeyInfo.actions.push(action);
+            pushUserAction({ type: userActionTypes.storeAction, action});
         }
         next(action);
     }
