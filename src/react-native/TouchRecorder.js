@@ -121,6 +121,7 @@ class TouchRecorder extends Component {
   shouldAdd = true;
 
   _onTouchStart(event) {
+    const { isRecording } = this.state;
     if (isRecording && this.shouldAdd) {
       event.persist();
       this.currentTouchId = `${event.nativeEvent.pageX}_${event.nativeEvent.pageY}`;
