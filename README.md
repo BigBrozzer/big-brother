@@ -1,8 +1,8 @@
 # big-brother
 
-##example of usage
+## example of usage
 
-###add to index.html
+### add to index.html
 ```html
 <div id='bb'></div>
 ```
