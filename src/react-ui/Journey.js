@@ -1,12 +1,14 @@
 import React, { Component } from 'react';
 import { startRecording, stopRecording, sendRecords, startPlaying } from '../middleware/journeyConnector';
 import JourneyControls from './JourneyControls';
+import RecordButton from './RecordButton';
 
 export class Journey extends Component {
     constructor(props) {
         super(props);
 
         this.state = {
+            isShowed: false,
             recording: false,
             playing: false,
             sending: false,
@@ -16,6 +18,8 @@ export class Journey extends Component {
         this.startRecording = this.startRecording.bind(this);
         this.stopRecording = this.stopRecording.bind(this);
         this.startPlaying = this.startPlaying.bind(this);
+        this.show = this.show.bind(this);
+        this.hide = this.hide.bind(this);
     }
 
     startRecording() {
@@ -41,9 +45,17 @@ export class Journey extends Component {
             .then(() => this.setState({ playing: true, sending: false }));
     }
 
+    show() {
+        this.setState({ isShowed: true });
+    }
+
+    hide() {
+        this.setState({ isShowed: false });
+    }
+
     render() {
-        return (
-            <div style={{position: 'fixed', top: '10px', right: '10px' }}>
+        if (this.state.isShowed) {
+            return (<div style={{width: '100%', height: '100%', border: '1px solid green'}}>
                 { this.state.sending
                     ? <span>Spinner</span>
                     : <JourneyControls
@@ -51,10 +63,13 @@ export class Journey extends Component {
                         startRecording={this.startRecording}
                         stopRecording={this.stopRecording}
                         startPlaying={this.startPlaying}
+                        handleHide={this.hide}
                     />
                 }
-            </div>
-        );
+            </div>);
+        } else {
+            return <RecordButton handleClick={this.show}></RecordButton>
+        }
     }
 }
 
