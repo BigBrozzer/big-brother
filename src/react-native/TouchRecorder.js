@@ -12,6 +12,8 @@ import {
 import { BlurView } from 'react-native-blur';
 var { getInstanceFromNode } = require('ReactNativeComponentTree');
 
+import { startRecording, stopRecording, sendRecords, startPlaying } from '../middleware/journeyConnector';
+
 class TouchHint extends Component {
   opacity = new Animated.Value(0);
   scale = new Animated.Value(0);
@@ -201,7 +203,17 @@ class TouchRecorder extends Component {
   }
 
   _startRecording() {
-    this.setState(state => ({ isRecording: !state.isRecording }), this._enableAdding);
+    this.setState(state => {
+      if (state.isRecording) {
+        stopRecording();
+      } else {
+        startRecording();
+      }
+      return {
+        isRecording: !state.isRecording,
+        isControlsModalVisible: false
+      };
+    }, this._enableAdding);
   };
 
   _showControlsModal() {
@@ -218,31 +230,27 @@ class TouchRecorder extends Component {
       <TouchableWithoutFeedback
         onLongPress={this._showControlsModal.bind(this)}
         style={styles.container}
-        onStartShouldSetResponder={event => !!event}
         pointerEvents="box-none"
-        onTouchStart={this._onTouchStart.bind(this)}
-        onTouchEnd={this._onTouchEnd.bind(this)}
+        onPressIn={this._onTouchStart.bind(this)}
+        onPressOut={this._onTouchEnd.bind(this)}
       >
+      <View style={styles.container}>
         {this.props.children}
         {!isRecording && this.state.touches.map(this.renderHint.bind(this))}
-        <TouchableOpacity
-          style={{ position: 'absolute', bottom: 10, left: 10 }}
-          onPress={this._startRecording.bind(this)}
-          onPressIn={this._disableAdding.bind(this)}
-        >
-          <View style={{ width: touchSize, height: touchSize, borderRadius: touchSize / 2, backgroundColor: 'red'}}></View>
-        </TouchableOpacity>
         <Modal
           visible={isControlsModalVisible}
           animationType="slide"
-          transparent={false}
+          transparent
           onRequestClose={this._hideControlsModal.bind(this)}
         >
+          <View style={styles.closeBtnContainer}>
+            <Text style={styles.closeBtnIcon}>X</Text>
+          </View>
           <BlurView
             style={styles.absolute}
             viewRef={this.modalContent}
-            blurType="light"
-            blurAmount={10}
+            blurType="dark"
+            blurAmount={5}
           />
           <View
             style={styles.modalContent}
@@ -252,9 +260,20 @@ class TouchRecorder extends Component {
               }
             }}
           >
+            <TouchableOpacity
+              style={styles.btn}
+              onPress={this._startRecording.bind(this)}
+              onPressIn={this._disableAdding.bind(this)}
+            >
+              <Text style={styles.btnText}>{isRecording ? 'Stop' : 'Start'} Recording</Text>
+            </TouchableOpacity>
+            <Text style={styles.hintText}>
+              Tap and hold 
+              to finish recording
+            </Text>
           </View>
-          <View style={styles.btn}><Text>Start Recording</Text></View>
         </Modal>
+      </View>
       </TouchableWithoutFeedback>
     );
   }
@@ -270,6 +289,43 @@ export default Component => props => {
 const touchSize = 40;
 const styles = StyleSheet.create({
   btnSize: touchSize,
+  btn: {
+    borderWidth: 1,
+    borderColor: 'white',
+    borderRadius: 35,
+    paddingVertical: 5,
+    paddingHorizontal: 15,
+    height: 55,
+    width: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  closeBtnContainer: {
+    justifyContent: 'flex-end',
+    borderWidth: 1,
+    borderColor: 'red',
+    position: 'absolute',
+    padding: 10,
+    top: 0,
+    left: 0,
+    right: 0,
+  },
+  closeBtnIcon: {
+    fontWeight: 'bold',
+    fontSize: 20,
+    color: 'rgba(0, 0, 0, 0.7)'
+  },
+  btnText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 20,
+  },
+  hintText: {
+    color: 'white',
+    fontSize: 15,
+    position: 'absolute',
+    bottom: 50,
+  },
   container: {
     flex: 1,
   },
@@ -279,6 +335,8 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   hint: {
     width: touchSize,

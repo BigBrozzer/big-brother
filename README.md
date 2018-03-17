@@ -17,6 +17,9 @@ ReactDOM.render(<BBUI />, document.getElementById('bb'));
 
 // for react-native apps - import hoc:
 import withRecorder from 'big-brother/src/react-native';
+
+//also run:
+//react-native link react-native-blur
 ```
 
 ## rewrite your's root reducer
