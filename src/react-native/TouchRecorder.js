@@ -43,7 +43,6 @@ class TouchHint extends Component {
       <TouchableOpacity
         onPressIn={onPressIn}
         onPress={onPress}
-        pointerEvents="box-only"
         style={[styles.hintBtn, {
           top: y_start - (styles.btnSize / 2),
           left: x_start - (styles.btnSize / 2),
@@ -74,39 +73,52 @@ class TouchHint extends Component {
     } = this.props;
 
     return (
-      <TouchableOpacity
-        onPressIn={onPressIn}
-        onPress={onPress}
-        pointerEvents="box-only"
-        style={[styles.hintBtn, {
-          top: y_start - (styles.btnSize / 2),
-          left: x_start - (styles.btnSize / 2),
-          transform: [{
-            scale: this.scale.interpolate({
-              inputRange: [0, 0.5, 1],
-              outputRange: [1, 0.6, 1]
-            })
-          }],
-        }]}
-      >
-        <Animated.View style={[styles.hint, { opacity: this.opacity }]} />
-      </TouchableOpacity>
+      <View style={{
+        flex: 1,
+        position: 'absolute',
+      }}>
+        <TouchableOpacity
+          onPressIn={onPressIn}
+          onPress={onPress}
+          style={[styles.hintBtn, {
+            top: y_start - (styles.btnSize / 2),
+            left: x_start - (styles.btnSize / 2),
+            transform: [{
+              scale: this.scale.interpolate({
+                inputRange: [0, 0.5, 1],
+                outputRange: [1, 0.6, 1]
+              })
+            }],
+          }]}
+        >
+          <Animated.View style={[styles.hint_green, { opacity: this.opacity }]} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPressIn={onPressIn}
+          onPress={onPress}
+          style={[styles.hintBtn, {
+            top: y_end - (styles.btnSize / 2),
+            left: x_end - (styles.btnSize / 2),
+            transform: [{
+              scale: this.scale.interpolate({
+                inputRange: [0, 0.5, 1],
+                outputRange: [1, 0.6, 1]
+              })
+            }],
+          }]}
+        >
+          <Animated.View style={[styles.hint_green, { opacity: this.opacity }]} />
+        </TouchableOpacity>
+      </View>
     );
   }
   
   render() {
     const {
-      id,
-      y_start,
-      x_start,
-      x_end,
-      y_end,
       timestamp_start,
       timestamp_end,
-      onPressIn,
-      onPress,
     } = this.props;
-    if (timestamp_end - timestamp_start < 100) {
+    if (timestamp_end - timestamp_start < 500) {
       return this._renderTap();
     }
     return this._renderSwipe();
@@ -149,6 +161,7 @@ class TouchRecorder extends Component {
         y_end: event.nativeEvent.pageY,
         timestamp_end: event.nativeEvent.timestamp,
       });
+      this.setState({ touches: updatedEvents });
     }
   };
 
@@ -227,6 +240,12 @@ const styles = StyleSheet.create({
     width: touchSize,
     height: touchSize,
     backgroundColor: 'rgba(255, 0, 0, 0.5)',
+    borderRadius: touchSize / 2,
+  },
+  hint_green: {
+    width: touchSize,
+    height: touchSize,
+    backgroundColor: 'rgba(0, 255, 0, 0.5)',
     borderRadius: touchSize / 2,
   },
   hintBtn: {
