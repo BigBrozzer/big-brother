@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { startRecording, stopRecording, sendRecords, startPlaying } from '../middleware/journeyConnector';
 import JourneyControls from './JourneyControls';
 
-export class Journey extends Component {
+class Journey extends Component {
     constructor(props) {
         super(props);
 
