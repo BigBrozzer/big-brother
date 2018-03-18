@@ -136,11 +136,12 @@ class TouchHint extends Component {
 class TouchRecorder extends Component {
   state = {
     touches: [],
+    userActions: [],
     isRecording: false,
     isControlsModalVisible: false,
     isReplayVisible: false,
     replayId: null,
-    lastRecorId: '5aae3457c2ef1639d45f6933',
+    lastRecorId: '5aae3decc2ef1639d45f873c',
   };
   shouldAdd = true;
 
@@ -244,12 +245,14 @@ class TouchRecorder extends Component {
 
   _startReplay(replayId) {
     startPlaying(replayId || this.state.replayId)
-      .then(({ userActions_rn }) => {
-        this.setState({
-          touches: userActions_rn,
-          isRecording: false,
-          isControlsModalVisible: false,
-        });
+      .then(({ userActions_rn, startTime }) => {
+        setTimeout(() => {
+          this.setState({
+            userActions: userActions_rn,
+            isRecording: false,
+            isControlsModalVisible: false,
+          });
+        }, userActions_rn[0].timestamp_start - startTime);
       });
   }
 
@@ -265,7 +268,7 @@ class TouchRecorder extends Component {
       >
       <View style={styles.container}>
         {this.props.children}
-        {!isRecording && this.state.touches.map(this.renderHint.bind(this))}
+        {!isRecording && this.state.userActions.map(this.renderHint.bind(this))}
         <Modal
           visible={isControlsModalVisible}
           animationType="slide"
@@ -322,7 +325,7 @@ class TouchRecorder extends Component {
                         this._startReplay(lastRecorId);
                       }}
                     >
-                      <Text style={styles.btnText}>{lastRecorId}</Text>
+                      <Text style={styles.btnText}>Last recording: {lastRecorId}</Text>
                     </TouchableOpacity>
                   </View>
                 )}
@@ -370,7 +373,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   replayControlsWrapper: {
-    marginVertical: 15
+    marginVertical: 15,
+    flexDirection: 'column',
   },
   closeBtnContainer: {
     justifyContent: 'flex-end',

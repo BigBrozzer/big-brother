@@ -15,8 +15,8 @@ export const Recorder = ({
      recordId
  }) => (
     recordId ? (
-        <div>
-            <span>Clipboard: {recordId}</span>
+        <div style={{display: 'inline-block'}}>
+            <span style={{display: 'inline-block', 'padding-right': '10px'}}>Clipboard: {recordId}</span>
             <a href={getUrl(recordId)}>Link for reproducing</a>
         </div>
     ) : (recording
