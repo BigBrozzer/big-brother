@@ -26,6 +26,7 @@ export const saveWebUserActions = actions => {
 
 export const startRecording = () => {
     journeyInfo.initialState = appStore.getState();
+    journeyInfo.startTime = (new Date).getTime();
 
     recording = true;
 };
@@ -44,26 +45,27 @@ export const startPlaying = (id) => api.getRecord(id)
     .then(response => {
       const {
         initialState,
+        startTime,
         actions,
         userActions_rn,
         userActions_web,
       } = response;
-        console.log('Received data', initialState, actions);
+        console.log('Received data', response);
 
         appStore.dispatch({
             type: 'JOURNEY_REPRODUCING',
             initialState
         });
 
-        actions.forEach((action, index) => {
-            setTimeout(() => appStore.dispatch(action), index*1000);
+        actions.forEach((action) => {
+            setTimeout(() => appStore.dispatch(action), action.timestamp - startTime);
         });
         return response;
     });
 
 export const journeyMiddleWare = store => next => action => {
     if (recording) {
-        journeyInfo.actions.push(action);
+        journeyInfo.actions.push({...action, timestamp: (new Date()).getTime() });
     }
     next(action);
 };
