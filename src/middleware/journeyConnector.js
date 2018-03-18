@@ -5,6 +5,8 @@ let recording = false;
 const initialJourneyInfo = {
     initialState: null,
     actions: [],
+    userActions_rn: [],
+    userActions_web: [],
 };
 const journeyInfo = {};
 const api = {
@@ -13,6 +15,14 @@ const api = {
 };
 let reducer = console.log;
 let appStore = null;
+
+export const saveRNUserActions = actions => {
+  journeyInfo.userActions_rn = actions;
+};
+
+export const saveWebUserActions = actions => {
+  journeyInfo.userActions_web = actions;
+};
 
 export const startRecording = () => {
     journeyInfo.initialState = appStore.getState();
@@ -31,7 +41,13 @@ export const resetRecorder = () => {
 };
 
 export const startPlaying = (id) => api.getRecord(id)
-    .then(({initialState, actions}) => {
+    .then(response => {
+      const {
+        initialState,
+        actions,
+        userActions_rn,
+        userActions_web,
+      } = response;
         console.log('Received data', initialState, actions);
 
         appStore.dispatch({
@@ -42,6 +58,7 @@ export const startPlaying = (id) => api.getRecord(id)
         actions.forEach((action, index) => {
             setTimeout(() => appStore.dispatch(action), index*1000);
         });
+        return response;
     });
 
 const journeyMiddleWare = store => {

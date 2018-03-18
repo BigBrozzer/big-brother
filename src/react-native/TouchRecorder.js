@@ -14,7 +14,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import { BlurView } from 'react-native-blur';
 var { getInstanceFromNode } = require('ReactNativeComponentTree');
 
-import { startRecording, stopRecording, sendRecords, startPlaying } from '../middleware/journeyConnector';
+import { startRecording, stopRecording, sendRecords, startPlaying, saveRNUserActions } from '../middleware/journeyConnector';
 
 class TouchHint extends Component {
   opacity = new Animated.Value(0);
@@ -210,6 +210,8 @@ class TouchRecorder extends Component {
     this.setState(state => {
       if (state.isRecording) {
         stopRecording();
+        saveRNUserActions(this.state.touches);
+        sendRecords();
       } else {
         startRecording();
       }
@@ -237,7 +239,14 @@ class TouchRecorder extends Component {
   }
 
   _startReplay() {
-    startPlaying(this.state.replayId);
+    startPlaying(this.state.replayId)
+      .then(({ userActions_rn }) => {
+        this.setState({
+          touches: userActions_rn,
+          isRecording: !state.isRecording,
+          isControlsModalVisible: false,
+        });
+      });
   }
 
   render() {
