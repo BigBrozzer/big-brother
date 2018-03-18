@@ -1,13 +1,12 @@
 import React  from 'react';
 import './Recorder.css';
 
-
 const getUrl = (id) => {
     const href = window.location.href;
     const separator = href.includes('?') ? '&' : '?';
 
     return `${href}${separator}bb-id=${id}`;
-}
+};
 
 export const Recorder = ({
      stopRecording,

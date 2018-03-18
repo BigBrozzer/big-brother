@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { startRecording, stopRecording, sendRecords, startPlaying } from '../middleware/journeyConnector';
 import JourneyControls from './JourneyControls';
+import PlayerControls from './PlayerControls';
 
 import './Journey.css';
 
@@ -66,9 +67,8 @@ class Journey extends Component {
                     handleHide={this.hide}
                 />
             }
-            {
-                this.state.recording && <div className="controls__frame"></div>
-            }
+            {this.state.recording && <div className="controls__frame"></div>}
+            {this.state.playing && <PlayerControls />}
         </div>);
     }
 }
