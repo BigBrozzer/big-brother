@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 
+import './Player.css';
+
 export class Player extends Component {
     constructor(props) {
         super(props);
@@ -12,7 +14,7 @@ export class Player extends Component {
 
     render() {
         return (
-            <form onSubmit={this.submit}>
+            <form className="player" onSubmit={this.submit}>
                 <input
                     type="text"
                     ref={(input) => { this.idInput = input; }}

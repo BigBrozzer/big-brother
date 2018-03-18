@@ -5,9 +5,8 @@ import Recorder from './Recorder';
 export const JourneyControls = props => (
     props.playing ? <span>Reproduced</span> : (
         <div>
-            {!props.recording &&  <Player {...props} />}
             <Recorder {...props} />
-            <button onClick={props.handleHide}>Hide controls</button>
+            {!props.recording &&  <Player {...props} />}
         </div>
     )
 );

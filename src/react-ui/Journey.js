@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import { startRecording, stopRecording, sendRecords, startPlaying } from '../middleware/journeyConnector';
 import JourneyControls from './JourneyControls';
-import RecordButton from './RecordButton';
+
+import './Journey.css';
 
 class Journey extends Component {
     constructor(props) {
@@ -54,22 +55,21 @@ class Journey extends Component {
     }
 
     render() {
-        if (this.state.isShowed) {
-            return (<div style={{width: '100%', height: '100%', border: '1px solid green'}}>
-                { this.state.sending
-                    ? <span>Spinner</span>
-                    : <JourneyControls
-                        {...this.state}
-                        startRecording={this.startRecording}
-                        stopRecording={this.stopRecording}
-                        startPlaying={this.startPlaying}
-                        handleHide={this.hide}
-                    />
-                }
-            </div>);
-        } else {
-            return <RecordButton handleClick={this.show}></RecordButton>
-        }
+        return (<div className={this.state.recording ? `controls controls_recording` : `controls`}>
+            { this.state.sending
+                ? <span>Spinner</span>
+                : <JourneyControls
+                    {...this.state}
+                    startRecording={this.startRecording}
+                    stopRecording={this.stopRecording}
+                    startPlaying={this.startPlaying}
+                    handleHide={this.hide}
+                />
+            }
+            {
+                this.state.recording && <div className="controls__frame"></div>
+            }
+        </div>);
     }
 }
 
