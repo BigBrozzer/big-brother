@@ -245,12 +245,14 @@ class TouchRecorder extends Component {
 
   _startReplay(replayId) {
     startPlaying(replayId || this.state.replayId)
-      .then(({ userActions_rn }) => {
-        this.setState({
-          userActions: userActions_rn,
-          isRecording: false,
-          isControlsModalVisible: false,
-        });
+      .then(({ userActions_rn, startTime }) => {
+        setTimeout(() => {
+          this.setState({
+            userActions: userActions_rn,
+            isRecording: false,
+            isControlsModalVisible: false,
+          });
+        }, userActions_rn[0].timestamp_start - startTime);
       });
   }
 
