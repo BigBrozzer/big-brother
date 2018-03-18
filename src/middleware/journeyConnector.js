@@ -44,22 +44,23 @@ export const startPlaying = (id) => api.getRecord(id)
         });
     });
 
-const journeyMiddleWare = store => {
-    appStore = store;
-
-    return next => action => {
-        if (recording) {
-            journeyInfo.actions.push(action);
-        }
-        next(action);
+export const journeyMiddleWare = store => next => action => {
+    if (recording) {
+        journeyInfo.actions.push(action);
     }
+    next(action);
 };
 
-const journeyConnector = (rootReducer, apiProvider) => {
+const journeyConnector = (store, rootReducer, apiProvider) => {
     Object.assign(api, apiProvider);
     reducer = rootReducer;
+    appStore = store;
 
-    return journeyMiddleWare;
+    const predefinedIdPair = window && window.location.search.replace('?', '').split('&').find(param => param.includes('bb-id'));
+    const predefinedId = predefinedIdPair && predefinedIdPair.split('=')[1];
+    if (predefinedId) {
+        setTimeout(() => startPlaying(predefinedId), 1000);
+    }
 };
 
 resetRecorder();

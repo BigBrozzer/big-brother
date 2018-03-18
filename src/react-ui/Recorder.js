@@ -2,13 +2,25 @@ import React  from 'react';
 import './Recorder.css';
 
 
+const getUrl = (id) => {
+    const href = window.location.href;
+    const separator = href.includes('?') ? '&' : '?';
+
+    return `${href}${separator}bb-id=${id}`;
+}
+
 export const Recorder = ({
      stopRecording,
      startRecording,
      recording,
      recordId
  }) => (
-    recordId ? <span>{recordId}</span> : (recording
+    recordId ? (
+        <div>
+            <span>Clipboard: {recordId}</span>
+            <a href={getUrl(recordId)}>Link for reproducing</a>
+        </div>
+    ) : (recording
         ? <button className="recorder-btn" onClick={stopRecording}>	&#9632;</button>
         : <span >
              <button className="recorder-btn recorder-btn_record" onClick={startRecording}>&#9679;</button>
