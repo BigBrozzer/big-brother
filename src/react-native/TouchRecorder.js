@@ -8,7 +8,9 @@ import {
   Text,
   TouchableWithoutFeedback,
   Modal,
+  TextInput,
 } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { BlurView } from 'react-native-blur';
 var { getInstanceFromNode } = require('ReactNativeComponentTree');
 
@@ -136,6 +138,8 @@ class TouchRecorder extends Component {
     touches: [],
     isRecording: false,
     isControlsModalVisible: false,
+    isReplayVisible: false,
+    replayId: null,
   };
   shouldAdd = true;
 
@@ -224,8 +228,20 @@ class TouchRecorder extends Component {
     this.setState({ isControlsModalVisible: false });
   }
 
+  _toggleReplayInput() {
+    this.setState(state => ({ isReplayVisible: !state.isReplayVisible }));
+  }
+
+  _onReplayIdChange(text) {
+    this.setState({ replayId: text });
+  }
+
+  _startReplay() {
+    startPlaying(this.state.replayId);
+  }
+
   render() {
-    const { isRecording, isControlsModalVisible } = this.state;
+    const { isRecording, isControlsModalVisible, isReplayVisible } = this.state;
     return (
       <TouchableWithoutFeedback
         onLongPress={this._showControlsModal.bind(this)}
@@ -243,35 +259,59 @@ class TouchRecorder extends Component {
           transparent
           onRequestClose={this._hideControlsModal.bind(this)}
         >
-          <View style={styles.closeBtnContainer}>
+          <TouchableOpacity onPress={this._hideControlsModal.bind(this)} style={styles.closeBtnContainer}>
             <Text style={styles.closeBtnIcon}>X</Text>
-          </View>
+          </TouchableOpacity>
           <BlurView
             style={styles.absolute}
             viewRef={this.modalContent}
             blurType="dark"
             blurAmount={5}
           />
-          <View
-            style={styles.modalContent}
-            ref={modalContent => {
-              if (modalContent) {
-                this.modalContent = modalContent;
-              }
-            }}
-          >
-            <TouchableOpacity
-              style={styles.btn}
-              onPress={this._startRecording.bind(this)}
-              onPressIn={this._disableAdding.bind(this)}
+          <KeyboardAwareScrollView>
+            <View
+              style={styles.modalContent}
+              ref={modalContent => {
+                if (modalContent) {
+                  this.modalContent = modalContent;
+                }
+              }}
             >
-              <Text style={styles.btnText}>{isRecording ? 'Stop' : 'Start'} Recording</Text>
-            </TouchableOpacity>
-            <Text style={styles.hintText}>
-              Tap and hold 
-              to finish recording
-            </Text>
-          </View>
+              <TouchableOpacity
+                style={styles.btn}
+                onPress={this._startRecording.bind(this)}
+                onPressIn={this._disableAdding.bind(this)}
+              >
+                <Text style={styles.btnText}>{isRecording ? 'Stop' : 'Start'} Recording</Text>
+              </TouchableOpacity>
+              <View style={styles.replayControlsWrapper}>
+                <TouchableOpacity
+                  style={styles.btn}
+                  onPress={this._toggleReplayInput.bind(this)}
+                >
+                  <Text style={styles.btnText}>Replay</Text>
+                </TouchableOpacity>
+                {isReplayVisible && (
+                  <View style={styles.inputWrapper}>
+                    <TextInput
+                      style={styles.input}
+                      autoFocus
+                      autoCorrect={false}
+                      placeholder="Replay ID"
+                      onChangeText={this._onReplayIdChange.bind(this)}
+                      onSubmitEditing={this._startReplay.bind(this)}
+                      returnKeyType="go"
+                      clearButtonMode="while-editing"
+                    />
+                  </View>
+                )}
+              </View>
+              <Text style={styles.hintText}>
+                Tap and hold 
+                to finish recording
+              </Text>
+            </View>
+          </KeyboardAwareScrollView>
         </Modal>
       </View>
       </TouchableWithoutFeedback>
@@ -289,6 +329,14 @@ export default Component => props => {
 const touchSize = 40;
 const styles = StyleSheet.create({
   btnSize: touchSize,
+  inputWrapper: {
+    marginTop: 10,
+    height: 55,
+  },
+  input: {
+    paddingVertical: 5,
+    paddingHorizontal: 15,
+  },
   btn: {
     borderWidth: 1,
     borderColor: 'white',
@@ -299,6 +347,9 @@ const styles = StyleSheet.create({
     width: 200,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  replayControlsWrapper: {
+    marginVertical: 15
   },
   closeBtnContainer: {
     justifyContent: 'flex-end',
@@ -335,7 +386,7 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'space-around',
     alignItems: 'center',
   },
   hint: {
