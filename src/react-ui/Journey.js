@@ -58,7 +58,7 @@ class Journey extends Component {
     render() {
         return (<div className={this.state.recording ? `controls controls_recording` : `controls`}>
             { this.state.sending
-                ? <span>Spinner</span>
+                ? <span>Loading...</span>
                 : <JourneyControls
                     {...this.state}
                     startRecording={this.startRecording}
