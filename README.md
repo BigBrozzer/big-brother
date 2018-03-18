@@ -15,10 +15,10 @@ import { BBUI } from 'big-brother';
 
 ReactDOM.render(<BBUI />, document.getElementById('bb'));
 
-// for react-native apps - import hoc:
+### for react-native apps - import hoc:
 import withRecorder from 'big-brother/src/react-native';
 
-//also run:
+#### also run:
 //react-native link react-native-blur
 ```
 
@@ -35,16 +35,18 @@ const rootReducer = (state, action) => {
 }
 ```
 
-### configure middleware
+### configure middleware and init bb-connector
 ```js
-import { bbMiddleware, bbMLabProvider } from 'big-brother';
+import { bbConnector, bbMiddleware, bbMLabProvider } from 'big-brother';
 
-const journeyMiddleware = bbMiddleware(rootReducer, bbMLabProvider({
+const middleware = applyMiddleware(bbMiddleware, thunk, logger());
+const store = createStore(rootReducer, defaultState, middleware);
+
+const apiProvider = bbMLabProvider({
     dbName: 'my-package',
     collName: 'journey',
     apiKey: 'Orf_sZpA2Pp2O5JdEoVUOZqq5dcRpeO5',
-}));
+});
+bbConnector(store, rootReducer, apiProvider);
 
-const middleware = applyMiddleware(journeyMiddleware, logger());
-const store = createStore(rootReducer, defaultState, middleware);
 ```
