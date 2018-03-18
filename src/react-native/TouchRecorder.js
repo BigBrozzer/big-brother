@@ -140,6 +140,7 @@ class TouchRecorder extends Component {
     isControlsModalVisible: false,
     isReplayVisible: false,
     replayId: null,
+    lastRecorId: '5aae3457c2ef1639d45f6933',
   };
   shouldAdd = true;
 
@@ -211,7 +212,10 @@ class TouchRecorder extends Component {
       if (state.isRecording) {
         stopRecording();
         saveRNUserActions(this.state.touches);
-        sendRecords();
+        sendRecords()
+          .then(id => {
+            this.setState({ lastRecorId: id });
+          });
       } else {
         startRecording();
       }
@@ -238,19 +242,19 @@ class TouchRecorder extends Component {
     this.setState({ replayId: text });
   }
 
-  _startReplay() {
-    startPlaying(this.state.replayId)
+  _startReplay(replayId) {
+    startPlaying(replayId || this.state.replayId)
       .then(({ userActions_rn }) => {
         this.setState({
           touches: userActions_rn,
-          isRecording: !state.isRecording,
+          isRecording: false,
           isControlsModalVisible: false,
         });
       });
   }
 
   render() {
-    const { isRecording, isControlsModalVisible, isReplayVisible } = this.state;
+    const { isRecording, isControlsModalVisible, isReplayVisible, lastRecorId } = this.state;
     return (
       <TouchableWithoutFeedback
         onLongPress={this._showControlsModal.bind(this)}
@@ -277,7 +281,7 @@ class TouchRecorder extends Component {
             blurType="dark"
             blurAmount={5}
           />
-          <KeyboardAwareScrollView>
+          <KeyboardAwareScrollView contentContainerStyle={{flex: 1}}>
             <View
               style={styles.modalContent}
               ref={modalContent => {
@@ -312,6 +316,14 @@ class TouchRecorder extends Component {
                       returnKeyType="go"
                       clearButtonMode="while-editing"
                     />
+                    <TouchableOpacity
+                      style={styles.btn_id}
+                      onPress={() => {
+                        this._startReplay(lastRecorId);
+                      }}
+                    >
+                      <Text style={styles.btnText}>{lastRecorId}</Text>
+                    </TouchableOpacity>
                   </View>
                 )}
               </View>
