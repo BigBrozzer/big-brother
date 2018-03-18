@@ -74,11 +74,14 @@ const journeyConnector = (store, rootReducer, apiProvider) => {
     Object.assign(api, apiProvider);
     reducer = rootReducer;
     appStore = store;
-
-    const predefinedIdPair = window && window.location.search.replace('?', '').split('&').find(param => param.includes('bb-id'));
-    const predefinedId = predefinedIdPair && predefinedIdPair.split('=')[1];
-    if (predefinedId) {
-        setTimeout(() => startPlaying(predefinedId), 1000);
+    try {
+        const predefinedIdPair = window && window.location.search.replace('?', '').split('&').find(param => param.includes('bb-id'));
+        const predefinedId = predefinedIdPair && predefinedIdPair.split('=')[1];
+        if (predefinedId) {
+            setTimeout(() => startPlaying(predefinedId), 1000);
+        }
+    } catch (e) {
+        console.log('Predefined id error', e);
     }
 };
 
